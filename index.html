@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beyond the Grid</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="style.css" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              f1red: "#E10600",
+              f1dark: "#1A1A1A",
+              f1gray: "#38383F",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gray-950 text-gray-100 min-h-screen font-sans">
+    <!-- ── Header ── -->
+    <header class="bg-f1dark border-b border-f1red">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-3">
+        <img
+          src="assets/F1-Logo.png"
+          alt="Formula 1"
+          class="h-8 w-auto object-contain"
+        />
+        <div>
+          <h1 class="text-lg font-bold leading-tight">Beyond the Grid</h1>
+          <p class="text-xs text-gray-400">
+            Explore Formula 1 Beyond the Results
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Filter Bar (hanya Season) ── -->
+    <section class="bg-f1gray border-b border-gray-700 sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap gap-3 items-end">
+        <!-- Season dropdown -->
+        <div class="flex flex-col gap-1">
+          <label
+            class="text-xs text-gray-400 font-semibold uppercase tracking-wide"
+            >Season</label
+          >
+          <select
+            id="sel-season"
+            class="bg-gray-800 border border-gray-600 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-f1red transition"
+          >
+            <option value="">Semua Musim</option>
+          </select>
+        </div>
+
+        <!-- Reset -->
+        <button
+          id="btn-reset"
+          class="mt-auto px-4 py-1.5 bg-f1red hover:bg-red-700 rounded-md text-sm font-semibold transition-colors"
+        >
+          Reset Filter
+        </button>
+
+        <!-- Loading indicator -->
+        <span
+          id="loading-indicator"
+          class="mt-auto text-xs text-gray-400 hidden animate-pulse"
+          >Memuat data…</span
+        >
+      </div>
+    </section>
+
+    <!-- ── Main ── -->
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-8">
+      <!-- KPI Cards -->
+      <section>
+        <h2 class="section-label">Ringkasan</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div class="kpi-card">
+            <span class="kpi-label">Total Races</span>
+            <span class="kpi-value" id="kpi-races-val">—</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Total Wins</span>
+            <span class="kpi-value" id="kpi-wins-val">—</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Total Podiums</span>
+            <span class="kpi-value" id="kpi-podiums-val">—</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Total Points</span>
+            <span class="kpi-value" id="kpi-points-val">—</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">DNF Rate</span>
+            <span class="kpi-value" id="kpi-dnf-val">—</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Driver Picker ── -->
+      <section>
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="section-label mb-0">Pilih Driver untuk Perbandingan</h2>
+            <p class="text-xs text-gray-500 mt-0.5">Klik hingga 3 driver</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Search -->
+            <input
+              id="driver-search"
+              type="text"
+              placeholder="Cari driver…"
+              class="bg-gray-800 border border-gray-600 rounded-md px-3 py-1.5 text-xs focus:outline-none focus:border-f1red transition w-40"
+            />
+            <!-- Selected count badge -->
+            <span id="driver-count-badge" class="text-xs text-gray-400 hidden">
+              <span id="driver-count-num" class="font-bold text-white">0</span
+              >/3 dipilih
+            </span>
+          </div>
+        </div>
+        <!-- Pill grid -->
+        <div id="driver-picker" class="driver-picker-grid">
+          <!-- Diisi oleh JS -->
+        </div>
+      </section>
+
+      <!-- Charts row 1 -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="chart-card">
+          <h3 class="chart-title">Championship Progression</h3>
+          <p class="chart-subtitle">
+            Poin kumulatif per ronde — pilih season &amp; driver untuk
+            perbandingan
+          </p>
+          <div class="chart-wrap"><canvas id="chart-progression"></canvas></div>
+          <p class="empty-state hidden" id="empty-progression">
+            Data tidak tersedia untuk filter ini.
+          </p>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Grid vs Finish Position</h3>
+          <p class="chart-subtitle">Posisi start vs finish tiap driver</p>
+          <div class="chart-wrap"><canvas id="chart-scatter"></canvas></div>
+          <p class="empty-state hidden" id="empty-scatter">
+            Data tidak tersedia untuk filter ini.
+          </p>
+        </div>
+      </section>
+
+      <!-- Charts row 2 -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="chart-card">
+          <h3 class="chart-title">Constructor Points per Season</h3>
+          <p class="chart-subtitle">
+            Poin akhir musim per konstruktor (top 10)
+          </p>
+          <div class="chart-wrap"><canvas id="chart-constructor"></canvas></div>
+          <p class="empty-state hidden" id="empty-constructor">
+            Data tidak tersedia untuk filter ini.
+          </p>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Wins per Driver — Top 10</h3>
+          <p class="chart-subtitle">
+            Total kemenangan driver terbanyak (filter aktif)
+          </p>
+          <div class="chart-wrap"><canvas id="chart-wins"></canvas></div>
+          <p class="empty-state hidden" id="empty-wins">
+            Data tidak tersedia untuk filter ini.
+          </p>
+        </div>
+      </section>
+
+      <!-- ── Fitur Baru: Head-to-Head + Qualifying Delta ── -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Head-to-Head Driver Comparison -->
+        <div class="chart-card">
+          <h3 class="chart-title">Head-to-Head Driver Comparison</h3>
+          <p class="chart-subtitle">
+            Statistik perbandingan langsung antar driver terpilih
+          </p>
+          <div id="h2h-container">
+            <p class="empty-state" id="empty-h2h">
+              Pilih 2–3 driver untuk melihat perbandingan.
+            </p>
+            <div id="h2h-table" class="hidden"></div>
+          </div>
+        </div>
+
+        <!-- Qualifying vs Race Delta -->
+        <div class="chart-card">
+          <h3 class="chart-title">Qualifying vs Race Position Delta</h3>
+          <p class="chart-subtitle">
+            Selisih posisi qualifying → finish (positif = naik, negatif = turun)
+          </p>
+          <div class="chart-wrap"><canvas id="chart-delta"></canvas></div>
+          <p class="empty-state hidden" id="empty-delta">
+            Pilih season untuk melihat data qualifying.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer
+      class="text-center text-xs text-gray-600 py-6 border-t border-gray-800 mt-4"
+    >
+      Beyond the Grid · Data source: Ergast API
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
