@@ -86,7 +86,7 @@ Ditambahkan instruksi efisiensi token di akhir prompt: _"HEMAT TOKEN (WAJIB): ja
 
 ---
 
-## Screenshot Hasil Pengujian
+#Hasil Pengujian
 
 > **Catatan:** Untuk melihat dashboard secara langsung, jalankan server lokal:
 >
@@ -126,33 +126,6 @@ bob-datsci/
 ├── script.js                       # Logika dashboard (modular, Vanilla JS)
 ├── prepare_data.py                 # ETL pipeline Python (pandas)
 └── README.md                       # Dokumentasi ini
-```
-
----
-
-## Cara Menjalankan
-
-### Prasyarat
-
-- Python 3.x dengan `pandas` terinstall (Anaconda direkomendasikan)
-- Browser modern (Chrome, Firefox, Safari, Edge)
-
-### Langkah
-
-```bash
-# 1. Pastikan dataset CSV ada di folder data/
-# File yang dibutuhkan: results.csv, races.csv, drivers.csv,
-# constructors.csv, status.csv, driver_standings.csv, constructor_standings.csv,
-# qualifying.csv
-
-# 2. Jalankan pipeline data (hanya perlu sekali)
-python prepare_data.py
-
-# 3. Jalankan HTTP server
-python -m http.server 8080
-
-# 4. Buka browser
-# → http://localhost:8080
 ```
 
 ---
